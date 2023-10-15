@@ -32,13 +32,13 @@ rm -f aur.json github.json
 validated_release_version=$(echo "$tag_name" | grep -E -o "[0-9]+\.[0-9]+\.[0-9]+")
 if [ "v$validated_release_version" != "$tag_name" ]; then
     echo "Tag validation failed"
-    echo "::set-output name=skip::true"
+    echo "skip=true" >> $GITHUB_OUTPUT
     exit 0
 fi
 
 if [ "v$version" == "$tag_name" ]; then
-    echo "::set-output name=skip::true"
+    echo "skip=true" >> $GITHUB_OUTPUT
 else
-    echo "::set-output name=skip::false"
-    echo "::set-output name=version::$validated_release_version"
+    echo "skip=false" >> $GITHUB_OUTPUT
+    echo "version=$validated_release_version" >> $GITHUB_OUTPUT
 fi
