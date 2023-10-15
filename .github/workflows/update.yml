@@ -1,0 +1,21 @@
+name: Check for updates
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 1 * * *"
+
+jobs:
+  updater:
+    name: "Updater"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+      - name: Version check
+        id: "check"
+        run: ./check.sh
+      - name: Update package
+        if: ${{ steps.check.outputs.skip == 'false' }}
+        run: |
+          echo "Update failed"
+          exit 1
