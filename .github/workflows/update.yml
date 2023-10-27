@@ -26,6 +26,8 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
+      - name: Build docker image
+        run: docker build -t archlinux-build .
       - name: Checkout AUR sources
         run: |
           echo "${{ secrets.SSH_KEY }}" > id_rsa
@@ -34,13 +36,32 @@ jobs:
           mkdir lms
           cd lms
           git init $(pwd)
+          git config user.name 'Vadim Kaushan (GutHub Actions)'
+          git config user.email 'admin@disasm.info'
           git remote add origin ssh://aur@aur.archlinux.org/lms.git
           git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin master
           git checkout --progress --force -B master refs/remotes/origin/master
-      - name: Update package
+      - name: Update AUR package manifest
         run: |
-          echo "Update failed"
-          exit 1
+          mkdir -p work
+          cp lms/* work/
+          chmod -R a+w work
+          docker run --rm -v "$(pwd)/work:/work" -u 1000:1000 archlinux-build /update_version.sh ${{ needs.check-for-updates.outputs.version }} || exit 1
+          cp "work/PKGBUILD" "work/.SRCINFO" lms/
+          cd lms
+          git diff
+          git add -u
+          git commit -m "Update to ${{ needs.check-for-updates.outputs.version }}"
+      - name: Build new version
+        run: |
+          docker run --rm -v "$(pwd)/work:/work" -u 1000:1000 archlinux-build /build.sh || exit 1
+          PKG=$(find "work" -name "lms-*.pkg.tar.*")
+          if [ -f "$PKG" ]; then
+            echo "Package: $PKG"
+          else
+            echo "Package not found"
+            exit 1
+          fi
       - name: Remove SSH key
         if: always()
         run: rm -f id_rsa
