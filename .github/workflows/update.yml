@@ -24,7 +24,23 @@ jobs:
     needs: check-for-updates
     if : ${{ needs.check-for-updates.outputs.skip == 'false' }}
     steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Checkout AUR sources
+        run: |
+          echo "${{ secrets.SSH_KEY }}" > id_rsa
+          chmod 400 id_rsa
+          export GIT_SSH_COMMAND="/usr/bin/ssh -i $(pwd)/id_rsa -o StrictHostKeyChecking=yes -o CheckHostIP=no -o UserKnownHostsFile=$(pwd)/known_hosts"
+          mkdir lms
+          cd lms
+          git init $(pwd)
+          git remote add origin ssh://aur@aur.archlinux.org/lms.git
+          git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin master
+          git checkout --progress --force -B master refs/remotes/origin/master
       - name: Update package
         run: |
           echo "Update failed"
           exit 1
+      - name: Remove SSH key
+        if: always()
+        run: rm -f id_rsa
