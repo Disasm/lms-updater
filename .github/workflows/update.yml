@@ -50,6 +50,12 @@ jobs:
           cp "work/PKGBUILD" "work/.SRCINFO" lms/
           cd lms
           git diff
+          # Sanity check: check that version was updated
+          s=$(git diff)
+          if [ -z "$s" ]; then
+            echo "AUR package is already updated"
+            exit 1
+          fi
           git add -u
           git commit -m "Update to ${{ needs.check-for-updates.outputs.version }}"
       - name: Build new version
