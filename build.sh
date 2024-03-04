@@ -9,6 +9,6 @@ set -eaux
 cd /work
 makepkg -src --noconfirm
 echo "Installing the package"
-sudo pacman -U --noconfirm lms-*.pkg.tar.zst
+sudo pacman -U --noconfirm lms-[0-9]*.pkg.tar.zst
 cat /etc/passwd
 ls -ld /var/lib/lms

@@ -61,7 +61,7 @@ jobs:
       - name: Build new version
         run: |
           docker run --rm -v "$(pwd)/work:/work" -u 1000:1000 archlinux-build /build.sh || exit 1
-          PKG=$(find "work" -name "lms-*.pkg.tar.*")
+          PKG=$(find "work" -name "lms-[0-9]*.pkg.tar.*")
           if [ -f "$PKG" ]; then
             echo "Package: $PKG"
           else
