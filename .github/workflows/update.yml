@@ -7,7 +7,7 @@ on:
 jobs:
   check-for-updates:
     name: "Check for updates"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       skip: ${{ steps.check.outputs.skip }}
       version: ${{ steps.check.outputs.version }}
@@ -20,7 +20,7 @@ jobs:
 
   update:
     name: "Update AUR package"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: check-for-updates
     if : ${{ needs.check-for-updates.outputs.skip == 'false' }}
     steps:
